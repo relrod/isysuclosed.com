@@ -91,8 +91,12 @@
     </small></p>
 
     <p style="text-align: center; color: #888888;"><small>
-    Valid HTML5.
+    Valid HTML5 · Weather information by Weather Underground
     </small></p>
+
+    <img
+      style="display: block; margin: 0 auto; width: 180px;"
+      src="http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg" />
   </div>
 </body>
 </html>
