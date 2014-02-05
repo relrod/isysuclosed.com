@@ -1,6 +1,7 @@
 <?php
   require 'functions.php';
   $c = new Closings();
+  $conds = $c->weatherconds();
 
   header('X-UA-Compatible: IE=edge');
   header('Cache-Control: no-cache');
@@ -34,6 +35,12 @@
     <h1>YSU Closing Status</h1>
 
     <p class="t">So, here's the deal.</p>
+
+    <p class="t">
+    The weather is currently
+    <strong><?php echo $conds['weather']; ?></strong> and
+    <strong><?php echo $conds['temp_f']; ?>°F</strong>.
+    </p>
 
     <p class="t">
     There are currently
