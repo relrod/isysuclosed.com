@@ -96,7 +96,8 @@
 
     <img
       style="display: block; margin: 0 auto; width: 180px;"
-      src="http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg" />
+      src="http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
+      alt="Weather Underground Logo" />
   </div>
 </body>
 </html>
