@@ -51,7 +51,7 @@ class Closings {
 
   function youngstownMentioned() {
     return preg_match(
-      '@Youngstown State University@i',
+      '@Youngstown State University:</strong>@i',
       $this->closings_src,
       $matches);
   }
