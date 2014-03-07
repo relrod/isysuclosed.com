@@ -90,6 +90,13 @@
     any way, and was written to make a point.
     </small></p>
 
+    <p style="text-align: center;"><small>
+    While hopefully accurate, this is NOT an official resource. Always confirm
+    with
+    <a href="https://swww.ysu.edu/downloads/closing_procedure.pdf">official</a>
+    resources.
+    </small></p>
+
     <p style="text-align: center; color: #888888;"><small>
     Valid HTML5 · Weather information by Weather Underground
     </small></p>
