@@ -93,7 +93,7 @@ main = scotty 3000 $
                         "make a point."
             H.p ! A.style "text-align: center;" $
               H.small $ do
-                _ <- "While hopefully cacurate, this is NOT an official "
+                _ <- "While hopefully accurate, this is NOT an official "
                 _ <- "resource. Always confirm with "
                 H.a ! A.href "https://swww.ysu.edu/downloads/closing_procedure.pdf" $ "official"
                 " resources."
