@@ -25,7 +25,7 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Text.Regex (mkRegex, matchRegex)
 
 main :: IO ()
-main = scotty 3000 $ do
+main = scotty 3000 $
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
     wkbn   <- liftIO $ W.get "http://wkbn.com/closings/"
@@ -34,8 +34,8 @@ main = scotty 3000 $ do
     alerts <- liftIO $ getAlerts wundergroundKey
     since  <- liftIO lastAlertsTime
     let closings = closingCount (wkbn ^. W.responseBody)
-        alertCount = alerts ^? key "alerts" . _Array . to (V.length)
-    html $ renderHtml $ do
+        alertCount = alerts ^? key "alerts" . _Array . to V.length
+    html $ renderHtml $
       H.docTypeHtml $ do
         H.head $ do
           H.meta ! A.charset "utf-8"
@@ -49,18 +49,18 @@ main = scotty 3000 $ do
           style
           H.title "YSU Closing Status"
           analytics
-        H.body $ do
+        H.body $
           H.div ! A.class_ "container" $ do
             H.h1 "YSU Closing Status"
             H.p ! A.class_ "t" $ "So, here's the deal:"
-            H.p ! A.class_ "t" $ toMarkup (intersperse " " $
+            H.p ! A.class_ "t" $ toMarkup (intersperse " "
               [ "The weather is currently"
                 -- TODO: Unsafe (^?!)
               , H.strong . toMarkup $ wx ^?! key "current_observation" . key "weather" . _String
               , "and"
               , H.strong . toMarkup $ wx ^?! key "current_observation" . key "temperature_string" . _String
               ]) <> "."
-            H.p ! A.class_ "t" $ toMarkup (intersperse " " $
+            H.p ! A.class_ "t" $ toMarkup (intersperse " "
               [ "There are currently"
               , H.strong (toMarkup . show $ closings)
               , "delays/closings according to a local (Youngstown) news source."
@@ -72,14 +72,14 @@ main = scotty 3000 $ do
                 then H.span ! A.style "color: green;" $ "WAS mentioned"
                 else H.span ! A.style "color: red;" $ "was NOT mentioned"
               " among them."
-            H.p ! A.class_ "t" $ toMarkup (intersperse " " $
+            H.p ! A.class_ "t" $ toMarkup (intersperse " "
               [ "There are currently"
               , H.strong . toMarkup . maybe "unknown" show $ alertCount
               , "weather alert(s) covering Youngstown as of"
               , H.strong (toMarkup since)
               ]) <> "."
-            when (fromMaybe 0 alertCount /= 0) $ do
-              H.ul $ do
+            when (fromMaybe 0 alertCount /= 0) $
+              H.ul $
                 mapM_ (\w -> H.li $ do
                          H.strong . toMarkup $ w ^. key "description" . _String
                          _ <- " expiring "
@@ -98,8 +98,7 @@ main = scotty 3000 $ do
                 H.a ! A.href "https://swww.ysu.edu/downloads/closing_procedure.pdf" $ "official"
                 " resources."
             H.p ! A.style "text-align: center; color: #888888" $
-              H.small $
-                "Valid HTML5. Weather information via Weather Underground."
+              H.small "Valid HTML5. Weather information via Weather Underground."
             H.img ! A.style "display: block; margin: 0 auto; width: 180px;"
                   ! A.src "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
                   ! A.alt "Weather Underground Logo"
@@ -146,7 +145,7 @@ getAlerts key' = do
     writeAlerts = do
       alerts <- getAlertsFromWU
       BL.writeFile "/var/tmp/isysuclosed_alerts.json" alerts
-      return $ alerts
+      return alerts
 
 lastAlertsTime :: IO String
 lastAlertsTime = do
@@ -180,10 +179,10 @@ getConditions key' = do
     writeConditions = do
       wx <- getConditionsFromWU
       BL.writeFile "/var/tmp/isysuclosed_wx.json" wx
-      return $ wx
+      return wx
 
 isMentioned :: BL.ByteString -> Bool
-isMentioned y = (B.pack "Youngstown State University:</strong>") `B.isInfixOf` BL.toStrict y
+isMentioned y = B.pack "Youngstown State University:</strong>" `B.isInfixOf` BL.toStrict y
 
 closingCount :: BL.ByteString -> Int
 closingCount x =
