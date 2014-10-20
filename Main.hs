@@ -34,6 +34,7 @@ main = scotty 3000 $ do
     alerts <- liftIO $ getAlerts wundergroundKey
     since  <- liftIO lastAlertsTime
     let closings = closingCount (wkbn ^. W.responseBody)
+        alertCount = alerts ^? key "alerts" . _Array . to (V.length)
     html $ renderHtml $ do
       H.docTypeHtml $ do
         H.head $ do
@@ -73,20 +74,22 @@ main = scotty 3000 $ do
               " among them."
             H.p ! A.class_ "t" $ toMarkup (intersperse " " $
               [ "There are currently"
-              , H.strong . toMarkup . maybe "unknown" show $ alerts ^? key "alerts" . _Array . to (V.length)
+              , H.strong . toMarkup . maybe "unknown" show $ alertCount
               , "weather alert(s) covering Youngstown as of"
               , H.strong (toMarkup since)
               ]) <> "."
-            when (length ["???" :: String] /= 0) $ do
+            when (fromMaybe 0 alertCount /= 0) $ do
               H.ul $ do
                 mapM_ (\w -> H.li $ do
-                         H.strong w
+                         H.strong . toMarkup $ w ^. key "description" . _String
                          _ <- " expiring "
-                         "???") ["???"]
+                         toMarkup $ w ^. key "expires" . _String) (alerts ^.. key "alerts" . values)
             H.hr
             H.p ! A.style "text-align: center;" $
               H.small $ "This website is not affiliated with Youngstown " <>
-                        "State University in any way. It was written to " <>
+                        "State University in any way. It was "<>
+                        (H.a ! A.href "https://github.com/relrod/isysuclosed.com/" $ "written") <>
+                        " to " <>
                         "make a point."
             H.p ! A.style "text-align: center;" $
               H.small $ do
