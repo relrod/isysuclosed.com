@@ -56,9 +56,9 @@ main = scotty 3000 $
             H.p ! A.class_ "t" $ toMarkup (intersperse " "
               [ "The weather is currently"
                 -- TODO: Unsafe (^?!)
-              , H.strong . toMarkup $ wx ^?! key "current_observation" . key "weather" . _String
+              , H.strong . toMarkup $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
               , "and"
-              , H.strong . toMarkup $ wx ^?! key "current_observation" . key "temperature_string" . _String
+              , H.strong . toMarkup $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
               ]) <> "."
             H.p ! A.class_ "t" $ toMarkup (intersperse " "
               [ "There are currently"
