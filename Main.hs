@@ -40,8 +40,8 @@ main = scotty 3000 $
         H.head $ do
           H.meta ! A.charset "utf-8"
           H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
-          H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js" $ mempty
-          H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/js/bootstrap.min.js" $ mempty
+          --H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js" $ mempty
+          --H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/js/bootstrap.min.js" $ mempty
           H.link ! A.href "//fonts.googleapis.com/css?family=Open+Sans" ! A.rel "stylesheet" ! A.type_ "text/css"
           H.link ! A.href "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
                  ! A.rel "stylesheet"
