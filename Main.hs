@@ -29,7 +29,7 @@ main = scotty 3000 $
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
     wkbn   <- liftIO $ W.get "http://wkbn.com/closings/"
-    wundergroundKey <- liftIO $ readFile "wunderground_api_key"
+    wundergroundKey <- liftIO $ readFile "/etc/isysuclosed/wunderground_api_key"
     wx     <- liftIO $ getConditions wundergroundKey
     alerts <- liftIO $ getAlerts wundergroundKey
     since  <- liftIO lastAlertsTime
