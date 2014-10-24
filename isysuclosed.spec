@@ -14,7 +14,13 @@ BuildRequires:  git ghc systemd
 Haskell (Snap Framework) app for isysuclosed.com
 
 %prep
-git clone git://github.com/relrod/isysuclosed.com/
+if [ -d isysuclosed.com ]; then
+  cd isysuclosed.com
+  git reset --hard && git pull
+else
+  git clone git://github.com/relrod/isysuclosed.com/
+  cd isysuclosed.com
+fi
 
 %build
 export LANG=en_US.UTF-8
@@ -27,6 +33,7 @@ cabal install
 
 %install
 mkdir -p %{buildroot}/%{_bindir}
+cd isysuclosed.com
 cp .cabal-sandbox/bin/%{name} %{buildroot}/%{_bindir}/%{name}
 
 # API conf (not stored in repo)
@@ -34,6 +41,7 @@ mkdir -p %{buildroot}/%{_sysconfdir}/%{name}
 touch %{buildroot}/%{_sysconfdir}/%{name}/wunderground_api_key
 
 # systemd
+mkdir -p %{buildroot}/%{_unitdir}
 cp pkg/%{name}.service %{buildroot}/%{_unitdir}/%{name}.service
 
 %files
