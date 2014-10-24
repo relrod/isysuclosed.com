@@ -1,0 +1,13 @@
+[Unit]
+Description=isysuclosed.com web app
+After=network.target
+Documentation=https://github.com/relrod/isysuclosed.com/
+
+[Service]
+ExecStart=/usr/bin/isysuclosed
+Type=simple
+User=nobody
+Group=nobody
+
+[Install]
+WantedBy=multi-user.target
