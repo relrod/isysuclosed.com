@@ -1,4 +1,6 @@
-%define gitdate 20141024
+%global gitdate 20141024
+%global buildhost %(hostname)
+
 Name:           isysuclosed
 Version:        0.1.0.0
 Release:        1.%{gitdate}git%{?dist}
@@ -8,7 +10,9 @@ URL:            https://github.com/relrod/isysuclosed.com
 BuildRequires:  git ghc systemd
 
 # This is disabled for my local builds, since I use cabal from git.
-#BuildRequires: cabal-install
+%if %{buildhost} != "t520.home.elrod.me"
+BuildRequires: cabal-install >= 1.18
+%endif
 
 %description
 Haskell (Snap Framework) app for isysuclosed.com
