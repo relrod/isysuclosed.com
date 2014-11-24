@@ -8,7 +8,6 @@ import Control.Monad.IO.Class
 import Data.Aeson.Lens
 import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
 import Data.Monoid
 import qualified Data.Text as T
@@ -17,11 +16,8 @@ import Data.Time.Format.Human
 import qualified Data.Vector as V
 import qualified Network.Wreq as W
 import System.Directory
-import Text.Blaze
-import Text.Blaze.Html
-import qualified Text.Blaze.Html5 as H
-import qualified Text.Blaze.Html5.Attributes as A
-import Text.Blaze.Html.Renderer.Text (renderHtml)
+import Lucid
+import Lucid.Base
 import Text.Regex (mkRegex, matchRegex)
 
 main :: IO ()
@@ -35,75 +31,76 @@ main = scotty 3000 $
     since  <- liftIO lastAlertsTime
     let closings = closingCount (wkbn ^. W.responseBody)
         alertCount = alerts ^? key "alerts" . _Array . to V.length
-    html $ renderHtml $
-      H.docTypeHtml $ do
-        H.head $ do
-          H.meta ! A.charset "utf-8"
-          H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
+    html $ renderText $
+      doctypehtml_ $ do
+        head_ $ do
+          with meta_ [charset_ "utf-8"]
+          with meta_[name_ "viewport", content_ "width=device-width, initial-scale=1"]
           --H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js" $ mempty
           --H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/js/bootstrap.min.js" $ mempty
-          H.link ! A.href "//fonts.googleapis.com/css?family=Open+Sans" ! A.rel "stylesheet" ! A.type_ "text/css"
-          H.link ! A.href "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
-                 ! A.rel "stylesheet"
-                 ! A.type_ "text/css"
+          with link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
+          with link_ [ href_ "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
+                     , rel_ "stylesheet"
+                     , type_ "text/css"
+                     ]
           style
-          H.title "YSU Closing Status"
+          title_ "YSU Closing Status"
           analytics
-        H.body $
-          H.div ! A.class_ "container" $ do
-            H.h1 "YSU Closing Status"
-            H.p ! A.class_ "t" $ "So, here's the deal:"
-            H.p ! A.class_ "t" $ toMarkup (intersperse " "
-              [ "The weather is currently"
-              , H.strong . toMarkup $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
-              , "and"
-              , H.strong . toMarkup $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
-              ]) <> "."
-            H.p ! A.class_ "t" $ toMarkup (intersperse " "
-              [ "There are currently"
-              , H.strong (toMarkup . show $ closings)
-              , "delays/closings according to a local (Youngstown) news source."
-              ])
-            H.p ! A.class_ "t" $ do
-              _ <- "Youngstown State University "
-              H.strong $
+        body_ $
+          with div_ [class_ "container"] $ do
+            h1_ "YSU Closing Status"
+            with p_ [class_ "t"] "So, here's the deal:"
+            with p_ [class_ "t"] $ do
+              "The weather is currently "
+              strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
+              " and "
+              strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
+              "."
+            with p_ [class_ "t"] $ do
+              "There are currently "
+              strong_ . toHtml . show $ closings
+              " delays/closings according to a local (Youngstown) news source."
+            with p_ [class_ "t"] $ do
+              "Youngstown State University "
+              strong_ $
                 if isMentioned (wkbn ^. W.responseBody)
-                then H.span ! A.style "color: green;" $ "WAS mentioned"
-                else H.span ! A.style "color: red;" $ "was NOT mentioned"
+                then with span_ [style_ "color: green;"] $ "WAS mentioned"
+                else with span_ [style_ "color: red;"] $ "was NOT mentioned"
               " among them."
-            H.p ! A.class_ "t" $ toMarkup (intersperse " "
-              [ "There are currently"
-              , H.strong . toMarkup . maybe "unknown" show $ alertCount
-              , "weather alert(s) covering Youngstown as of"
-              , H.strong (toMarkup since)
-              ]) <> "."
+            with p_ [class_ "t"] $ do
+              "There are currently "
+              strong_ . toHtml $ maybe "unknown" show $ alertCount
+              " weather alert(s) covering Youngstown as of "
+              strong_  . toHtml $ since
+              "."
             when (fromMaybe 0 alertCount /= 0) $
-              H.ul $
-                mapM_ (\w -> H.li $ do
-                         H.strong . toMarkup $ w ^. key "description" . _String
+              ul_ $
+                mapM_ (\w -> li_ $ do
+                         strong_ . toHtml $ w ^. key "description" . _String
                          _ <- " expiring "
-                         toMarkup $ w ^. key "expires" . _String) (alerts ^.. key "alerts" . values)
-            H.hr
-            H.p ! A.style "text-align: center;" $
-              H.small $ "This website is not affiliated with Youngstown " <>
+                         w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+            hr_
+            with p_ [style_ "text-align: center;"] $
+              small_ $ "This website is not affiliated with Youngstown " <>
                         "State University in any way. It was "<>
-                        (H.a ! A.href "https://github.com/relrod/isysuclosed.com/" $ "written") <>
+                        (with a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written") <>
                         " to " <>
                         "make a point."
-            H.p ! A.style "text-align: center;" $
-              H.small $ do
-                _ <- "While hopefully accurate, this is NOT an official "
-                _ <- "resource. Always confirm with "
-                H.a ! A.href "https://swww.ysu.edu/downloads/closing_procedure.pdf" $ "official"
+            with p_ [style_ "text-align: center;"] $
+              small_ $ do
+                "While hopefully accurate, this is NOT an official "
+                "resource. Always confirm with "
+                with a_ [href_ "https://swww.ysu.edu/downloads/closing_procedure.pdf"] "official"
                 " resources."
-            H.p ! A.style "text-align: center; color: #888888" $
-              H.small "Valid HTML5. Weather information via Weather Underground."
-            H.img ! A.style "display: block; margin: 0 auto; width: 180px;"
-                  ! A.src "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
-                  ! A.alt "Weather Underground Logo"
+            with p_ [style_ "text-align: center; color: #888888"] $
+              small_ "Valid HTML5. Weather information via Weather Underground."
+            with img_ [ style_ "display: block; margin: 0 auto; width: 180px;"
+                      , src_ "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
+                      , alt_ "Weather Underground Logo"
+                      ]
 
-analytics :: Html
-analytics = H.script . H.preEscapedToHtml . T.concat $
+analytics :: HtmlT Identity ()
+analytics = script_ . T.concat $
             [ "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){"
             , "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),"
             , "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)"
@@ -112,8 +109,8 @@ analytics = H.script . H.preEscapedToHtml . T.concat $
             , "ga('send', 'pageview');"
             ]
 
-style :: Html
-style = H.style . H.preEscapedToHtml . T.concat $
+style :: HtmlT Identity ()
+style = style_ . T.concat $
         [ "* { font-family: \"Proxima Nova\", \"Open Sans\", sans-serif !important; }"
         , "h1 { font-weight: bold; text-align: center; }"
         , "p.t { font-size: 1.8em; text-align: center; }"
