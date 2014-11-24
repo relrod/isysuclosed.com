@@ -1,8 +1,8 @@
-%global gitdate 20141024
+%global gitdate 20141124
 %global buildhost %(hostname)
 
 Name:           isysuclosed
-Version:        0.1.0.0
+Version:        0.2.0.0
 Release:        1.%{gitdate}git%{?dist}
 Summary:        The "isysuclosed.com" webapp.
 License:        BSD
@@ -10,7 +10,7 @@ URL:            https://github.com/relrod/isysuclosed.com
 BuildRequires:  git ghc systemd
 
 # This is disabled for my local builds, since I use cabal from git.
-%if %{buildhost} != "t520.home.elrod.me"
+%if "%{buildhost}" != "t520.home.elrod.me"
 BuildRequires: cabal-install >= 1.18
 %endif
 
@@ -55,5 +55,8 @@ cp pkg/%{name}.service %{buildroot}/%{_unitdir}/%{name}.service
 %{_bindir}/%{name}
 
 %changelog
+* Mon Nov 24 2014 Ricky Elrod <rbelrod@student.ysu.edu> - 0.2.0.0-1.20141124git
+- Deploy
+
 * Fri Oct 24 2014 Ricky Elrod <rbelrod@student.ysu.edu> - 0.1.0.0-1.20141024git
 - Initial build
