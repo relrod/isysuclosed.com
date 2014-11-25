@@ -34,40 +34,40 @@ main = scotty 3000 $
     html $ renderText $
       doctypehtml_ $ do
         head_ $ do
-          with meta_ [charset_ "utf-8"]
-          with meta_[name_ "viewport", content_ "width=device-width, initial-scale=1"]
+          meta_ [charset_ "utf-8"]
+          meta_[name_ "viewport", content_ "width=device-width, initial-scale=1"]
           --H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js" $ mempty
           --H.script ! A.src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/js/bootstrap.min.js" $ mempty
-          with link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
-          with link_ [ href_ "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
-                     , rel_ "stylesheet"
-                     , type_ "text/css"
-                     ]
+          link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
+          link_ [ href_ "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
+                , rel_ "stylesheet"
+                , type_ "text/css"
+                ]
           style
           title_ "YSU Closing Status"
           analytics
         body_ $
-          with div_ [class_ "container"] $ do
+          div_ [class_ "container"] $ do
             h1_ "YSU Closing Status"
-            with p_ [class_ "t"] "So, here's the deal:"
-            with p_ [class_ "t"] $ do
+            p_ [class_ "t"] "So, here's the deal:"
+            p_ [class_ "t"] $ do
               "The weather is currently "
               strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
               " and "
               strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
               "."
-            with p_ [class_ "t"] $ do
+            p_ [class_ "t"] $ do
               "There are currently "
               strong_ . toHtml . show $ closings
               " delays/closings according to a local (Youngstown) news source."
-            with p_ [class_ "t"] $ do
+            p_ [class_ "t"] $ do
               "Youngstown State University "
               strong_ $
                 if isMentioned (wkbn ^. W.responseBody)
-                then with span_ [style_ "color: green;"] $ "WAS mentioned"
-                else with span_ [style_ "color: red;"] $ "was NOT mentioned"
+                then span_ [style_ "color: green;"] $ "WAS mentioned"
+                else span_ [style_ "color: red;"] $ "was NOT mentioned"
               " among them."
-            with p_ [class_ "t"] $ do
+            p_ [class_ "t"] $ do
               "There are currently "
               strong_ . toHtml $ maybe "unknown" show $ alertCount
               " weather alert(s) covering Youngstown as of "
@@ -79,22 +79,22 @@ main = scotty 3000 $
                          strong_ . toHtml $ w ^. key "description" . _String
                          _ <- " expiring "
                          w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
-            hr_
-            with p_ [style_ "text-align: center;"] $
-              small_ $ "This website is not affiliated with Youngstown " <>
+            hr_ []
+            p_ [style_ "text-align: center;"] $
+              small_ $ "This website is not affiliated Youngstown " <>
                         "State University in any way. It was "<>
-                        (with a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written") <>
+                        (a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written") <>
                         " to " <>
                         "make a point."
-            with p_ [style_ "text-align: center;"] $
+            p_ [style_ "text-align: center;"] $
               small_ $ do
                 "While hopefully accurate, this is NOT an official "
-                "resource. Always confirm with "
-                with a_ [href_ "https://swww.ysu.edu/downloads/closing_procedure.pdf"] "official"
+                "resource. Always confirm "
+                a_ [href_ "https://swww.ysu.edu/downloads/closing_procedure.pdf"] "official"
                 " resources."
-            with p_ [style_ "text-align: center; color: #888888"] $
+            p_ [style_ "text-align: center; color: #888888"] $
               small_ "Valid HTML5. Weather information via Weather Underground."
-            with img_ [ style_ "display: block; margin: 0 auto; width: 180px;"
+            img_ [ style_ "display: block; margin: 0 auto; width: 180px;"
                       , src_ "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
                       , alt_ "Weather Underground Logo"
                       ]
