@@ -88,7 +88,7 @@ main = scotty 3000 $
             p_ [style_ "text-align: center;"] $
               small_ $ do
                 "While hopefully accurate, this is NOT an official "
-                "resource. Always confirm "
+                "resource. Always confirm with "
                 a_ [href_ "https://swww.ysu.edu/downloads/closing_procedure.pdf"] "official"
                 " resources."
             p_ [style_ "text-align: center; color: #888888"] $
