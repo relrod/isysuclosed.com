@@ -17,7 +17,6 @@ import qualified Data.Vector as V
 import qualified Network.Wreq as W
 import System.Directory
 import Lucid
-import Lucid.Base
 import Text.Regex (mkRegex, matchRegex)
 
 main :: IO ()
