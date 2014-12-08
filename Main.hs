@@ -76,7 +76,7 @@ main = scotty 3000 $
               ul_ $
                 mapM_ (\w -> li_ $ do
                          strong_ . toHtml $ w ^. key "description" . _String
-                         _ <- " expiring "
+                         " expiring "
                          w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
             hr_ []
             p_ [style_ "text-align: center;"] $
