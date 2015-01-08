@@ -23,7 +23,7 @@ main :: IO ()
 main = scotty 3000 $
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
-    wkbn   <- liftIO $ W.get "http://wkbn.com/closings/"
+    wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
     wundergroundKey <- liftIO $ readFile "/etc/isysuclosed/wunderground_api_key"
     wx     <- liftIO $ getConditions wundergroundKey
     alerts <- liftIO $ getAlerts wundergroundKey
@@ -183,10 +183,10 @@ getConditions key' = do
       return wx
 
 isMentioned :: BL.ByteString -> Bool
-isMentioned y = B.pack "Youngstown State University:</strong>" `B.isInfixOf` BL.toStrict y
+isMentioned y = B.pack "Youngstown State University</b>:" `B.isInfixOf` BL.toStrict y
 
 closingCount :: BL.ByteString -> Int
 closingCount x =
-  let regex' = mkRegex "([0-9]+) Closings &amp; Delays"
+  let regex' = mkRegex "([0-9]+) closings?/delays? under All"
       matched = fmap (read . head) (matchRegex regex' (BL.unpack x))
   in fromMaybe 0 matched
