@@ -69,9 +69,13 @@ main = scotty 3000 $
                 else span_ [style_ "color: red;"] $ "was NOT mentioned"
               " among them."
             p_ [class_ "t"] $ do
-              "There are currently "
-              strong_ . toHtml $ maybe "unknown" show $ alertCount
-              " weather alert(s) covering Youngstown as of "
+              "There "
+              if fromMaybe 0 alertCount == 1 then "is " else "are "
+              "currently "
+              strong_ . toHtml $ maybe "unknown" show alertCount
+              " weather "
+              if fromMaybe 0 alertCount == 1 then "alert " else "alerts "
+              "covering Youngstown as of "
               strong_  . toHtml $ since
               "."
             when (fromMaybe 0 alertCount /= 0) $
