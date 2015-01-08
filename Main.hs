@@ -54,6 +54,10 @@ main = scotty 3000 $
               strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
               "."
             p_ [class_ "t"] $ do
+              "With the windchill, it feels like "
+              strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
+              "."
+            p_ [class_ "t"] $ do
               "There are currently "
               strong_ . toHtml . show $ closings
               " delays/closings according to a local (Youngstown) news source."
