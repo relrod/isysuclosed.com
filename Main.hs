@@ -58,9 +58,12 @@ main = scotty 3000 $
               strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
               "."
             p_ [class_ "t"] $ do
-              "There are currently "
+              "There "
+              if closings == 1 then "is " else "are "
+              "currently "
               strong_ . toHtml . show $ closings
-              " delays/closings according to a local (Youngstown) news source."
+              if closings == 1 then "delay or closing " else "delays/closings "
+              "according to a local (Youngstown) news source."
             p_ [class_ "t"] $ do
               "Youngstown State University "
               strong_ $
