@@ -26,7 +26,7 @@ executable isysuclosed
                      , http-types >= 0.8 && < 0.9
                      , lens >= 4 && < 5
                      , lens-aeson
-                     , lucid >= 2.0 && < 2.4
+                     , lucid >= 2.0 && < 2.7
                      , regex-compat
                      , scotty >= 0.9 && < 1
                      , scientific >= 0.3 && < 0.4
