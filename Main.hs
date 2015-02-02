@@ -241,7 +241,7 @@ constructTweet :: Int -> Maybe Int -> Maybe T.Text -> Maybe T.Text -> Bool -> Ht
 constructTweet nc na wc cond yClosed =
   a_ [ class_ "twitter-share-button"
      , href_ "https://twitter.com/share"
-     , data_ "url" "http://isysuclosed.com"
+     , data_ "url" "https://isysuclosed.com"
      , data_ "text" (T.pack tweetText)
      ] (toHtml tweetText)
   where
