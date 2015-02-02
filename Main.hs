@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 import Web.Scotty
 
@@ -109,7 +110,14 @@ main = scotty 3000 $ do
                          " expiring "
                          w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
             hr_ []
-            p_ [style_ "text-align: center;"] $
+            p_ [style_ "text-align: center;"] $ do
+              constructTweet
+                closings
+                alertCount
+                (wx ^? key "current_observation" . key "feelslike_string" . _String)
+                (wx ^? key "current_observation" . key "weather" . _String)
+                (isMentioned (wkbn ^. W.responseBody))
+              br_ []
               small_ $ "This website is not affiliated Youngstown " <>
                         "State University in any way. It was "<>
                         (a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written") <>
@@ -124,9 +132,10 @@ main = scotty 3000 $ do
             p_ [style_ "text-align: center; color: #888888"] $
               small_ "Valid HTML5. Weather information via Weather Underground."
             img_ [ style_ "display: block; margin: 0 auto; width: 180px;"
-                      , src_ "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
-                      , alt_ "Weather Underground Logo"
-                      ]
+                 , src_ "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
+                 , alt_ "Weather Underground Logo"
+                 ]
+            twitter
 
 analytics :: HtmlT Identity ()
 analytics = script_ . T.concat $
@@ -214,3 +223,63 @@ closingCount x =
   let regex' = mkRegex "([0-9]+) closings?/delays? under All"
       matched = fmap (read . head) (matchRegex regex' (BL.unpack x))
   in fromMaybe 0 matched
+
+-- | Let's start playing hard-ass. Here we make it easy to *share* YSU's stupid
+-- decisions.
+
+twitter :: HtmlT Identity ()
+twitter = script_ . T.concat $
+          [ "window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName"
+          , "(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d."
+          , "createElement(s);js.id=id;js.src=\"https://platform.twitter.com/"
+          , "widgets.js\";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready"
+          , "=function(f){t._e.push(f);};return t;}(document,\"script\",\""
+          , "twitter-wjs\"));"
+          ]
+
+constructTweet :: Int -> Maybe Int -> Maybe T.Text -> Maybe T.Text -> Bool -> HtmlT Identity ()
+constructTweet nc na wc cond yClosed =
+  a_ [ class_ "twitter-share-button"
+     , href_ "https://twitter.com/share"
+     , data_ "url" "http://isysuclosed.com"
+     , data_ "text" (T.pack tweetText)
+     ] (toHtml tweetText)
+  where
+    pluralityClosings = if nc == 1
+                        then "closing"
+                        else "closings"
+    pluralityAlerts = if (fromMaybe 0 na) == 1
+                      then "alert"
+                      else "alerts"
+
+    -- This is our ideal, but longest tweet. It probably spans > 140 chars.
+    idealTweet = show nc ++ " " ++ pluralityClosings ++ ", " ++
+                 show (fromMaybe 0 na) ++ " " ++ pluralityAlerts ++
+                 ", " ++ T.unpack (fromMaybe "(unknown)" cond) ++ "/" ++
+                 T.unpack (fromMaybe "(unknown)" wc) ++
+                 " and still not closed. #YSU"
+
+    -- Here's our fallback. We cut out the alert count.
+    fallbackTweet = show nc ++ " " ++ pluralityClosings ++ ", " ++
+                    T.unpack (fromMaybe "(unknown)" cond) ++ "/" ++
+                    T.unpack (fromMaybe "(unknown)" wc) ++
+                    " and still not closed. #YSU"
+
+    -- If we're still too far over the limit, cut out weather conditions.
+    fallbackTweet2 = show nc ++ " " ++ pluralityClosings ++ ", " ++
+                     T.unpack (fromMaybe "(unknown)" wc) ++
+                     " and still not closed. #YSU"
+
+    -- Lastly, give up and __only__ show closing count.
+    giveUpTweet = show nc ++ " " ++ pluralityClosings ++ " but still not #YSU. "
+
+
+    -- We have to do some toying around here. First off...
+    tweetText
+      | yClosed == True = "Hell has frozen over! #YSU is #Closed!"
+    -- But now we have to be careful about length. We have 140 chars to work
+    -- with.
+      | length idealTweet <= 140 = idealTweet
+      | length fallbackTweet <= 140 = fallbackTweet
+      | length fallbackTweet2 <= 140 = fallbackTweet2
+      | otherwise = giveUpTweet
