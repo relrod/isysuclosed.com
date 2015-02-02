@@ -7,7 +7,7 @@ Release:        1.%{gitdate}git%{?dist}
 Summary:        The "isysuclosed.com" webapp.
 License:        BSD
 URL:            https://github.com/relrod/isysuclosed.com
-BuildRequires:  git ghc systemd
+BuildRequires:  git ghc systemd chrpath
 
 # This is disabled for my local builds, since I use cabal from git.
 %if "%{buildhost}" != "t520.home.elrod.me"
@@ -39,6 +39,7 @@ cabal install
 mkdir -p %{buildroot}/%{_bindir}
 cd isysuclosed.com
 cp .cabal-sandbox/bin/%{name} %{buildroot}/%{_bindir}/%{name}
+chrpath --delete %{buildroot}/%{_bindir}/%{name}
 
 # API conf (not stored in repo)
 mkdir -p %{buildroot}/%{_sysconfdir}/%{name}
