@@ -1,8 +1,8 @@
-%global gitdate 20150108
+%global gitdate 20150201
 %global buildhost %(hostname)
 
 Name:           isysuclosed
-Version:        0.2.2.1
+Version:        0.2.3.0
 Release:        1.%{gitdate}git%{?dist}
 Summary:        The "isysuclosed.com" webapp.
 License:        BSD
@@ -55,6 +55,9 @@ cp pkg/%{name}.service %{buildroot}/%{_unitdir}/%{name}.service
 %{_bindir}/%{name}
 
 %changelog
+* Sun Feb 01 2015 Ricky Elrod <rbelrod@student.ysu.edu> - 0.2.3.0-1.20150201git
+- Deploy
+
 * Thu Jan 08 2015 Ricky Elrod <rbelrod@student.ysu.edu> - 0.2.2.1-2.20150108git
 - Deploy
 
