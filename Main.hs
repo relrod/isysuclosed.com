@@ -5,6 +5,7 @@ import Control.Exception
 import Control.Lens
 import Control.Monad
 import Control.Monad.IO.Class
+import qualified Data.Aeson as A
 import Data.Aeson.Lens
 import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy.Char8 as BL
@@ -19,8 +20,28 @@ import System.Directory
 import Lucid
 import Text.Regex (mkRegex, matchRegex)
 
+data ClosingStatus = ClosingStatus {
+    _isClosed :: Bool
+  , _numClosings :: Int
+  , _numAlerts :: Int
+  } deriving (Eq, Ord, Show)
+
+instance A.ToJSON ClosingStatus where
+  toJSON (ClosingStatus i nc na) = A.object [ "is_closed" A..= i
+                                            , "closings" A..= nc
+                                            , "alerts" A..= na
+                                            ]
+
 main :: IO ()
-main = scotty 3000 $
+main = scotty 3000 $ do
+  get "/json" $ do
+    setHeader "Cache-Control" "no-cache"
+    wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
+    wundergroundKey <- liftIO $ readFile "/etc/isysuclosed/wunderground_api_key"
+    alerts <- liftIO $ getAlerts wundergroundKey
+    let closings = closingCount (wkbn ^. W.responseBody)
+        alertCount = alerts ^? key "alerts" . _Array . to V.length
+    json $ ClosingStatus (isMentioned (wkbn ^. W.responseBody)) closings (fromMaybe 0 alertCount)
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
     wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
@@ -62,7 +83,7 @@ main = scotty 3000 $
               if closings == 1 then "is " else "are "
               "currently "
               strong_ . toHtml . show $ closings
-              if closings == 1 then "delay or closing " else "delays/closings "
+              if closings == 1 then " delay or closing " else " delays/closings "
               "according to a local (Youngstown) news source."
             p_ [class_ "t"] $ do
               "Youngstown State University "
