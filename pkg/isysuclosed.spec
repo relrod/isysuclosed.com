@@ -30,8 +30,8 @@ fi
 export LANG=en_US.UTF-8
 cd isysuclosed.com
 cabal sandbox init
-cabal install --only-dependencies
-cabal install
+cabal install -j --only-dependencies
+cabal install -j
 
 %check
 
