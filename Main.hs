@@ -30,7 +30,7 @@ data PreexistingClosing = PreexistingClosing {
 
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
-  [ PreexistingClosing (fromGregorian 2015 11 09) "Veterans Day"
+  [ PreexistingClosing (fromGregorian 2015 11 11) "Veterans Day"
   , PreexistingClosing (fromGregorian 2015 11 25) "Thanksgiving (offices open; no classes)"
   , PreexistingClosing (fromGregorian 2015 11 26) "Thanksgiving"
   , PreexistingClosing (fromGregorian 2015 11 27) "Columbus Day Observed"
