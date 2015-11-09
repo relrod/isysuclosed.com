@@ -106,7 +106,7 @@ weatherCheckBody
   :: (AsValue s, AsValue s1, ToHtml r,
       Term [Attribute] (HtmlT Identity () -> t)) =>
      s1 -> Int -> W.Response BL.ByteString -> Maybe Int -> s -> r -> t
-weatherCheckBody wx closings wkbn alertCount alerts since = do
+weatherCheckBody wx closings wkbn alertCount alerts since =
   div_ [class_ "container"] $ do
     h1_ "YSU Closing Status"
     p_ [class_ "t"] "So, here's the deal:"
@@ -131,8 +131,8 @@ weatherCheckBody wx closings wkbn alertCount alerts since = do
       "Youngstown State University "
       strong_ $
         if isMentioned (wkbn ^. W.responseBody)
-        then span_ [style_ "color: green;"] $ "WAS mentioned"
-        else span_ [style_ "color: red;"] $ "was NOT mentioned"
+        then span_ [style_ "color: green;"] "WAS mentioned"
+        else span_ [style_ "color: red;"] "was NOT mentioned"
       " among them."
     p_ [class_ "t"] $ do
       "There "
@@ -151,7 +151,7 @@ weatherCheckBody wx closings wkbn alertCount alerts since = do
                  " expiring "
                  w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
     hr_ []
-    p_ [style_ "text-align: center;"] $ do
+    p_ [style_ "text-align: center;"] $
       constructTweet
         closings
         alertCount
@@ -165,7 +165,7 @@ footer = do
   small_ [style_ "display: block; text-align: center"] $ do
     "This website is not affiliated Youngstown State University in any way. It "
     "was "
-    (a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written")
+    a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written"
     " to make a point."
   p_ [style_ "text-align: center;"] $
     small_ $ do
@@ -293,7 +293,7 @@ constructTweet nc na wc cond yClosed =
     pluralityClosings = if nc == 1
                         then "closing"
                         else "closings"
-    pluralityAlerts = if (fromMaybe 0 na) == 1
+    pluralityAlerts = if fromMaybe 0 na == 1
                       then "alert"
                       else "alerts"
 
@@ -321,7 +321,7 @@ constructTweet nc na wc cond yClosed =
 
     -- We have to do some toying around here. First off...
     tweetText
-      | yClosed == True = "Hell has frozen over! #YSU is #Closed!"
+      | yClosed = "Hell has frozen over! #YSU is #Closed!"
     -- But now we have to be careful about length. We have 140 chars to work
     -- with.
       | length idealTweet <= 140 = idealTweet
