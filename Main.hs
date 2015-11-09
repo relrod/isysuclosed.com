@@ -18,10 +18,13 @@ import Data.Time.Calendar
 import Data.Time.Clock
 import Data.Time.Format.Human
 import qualified Data.Vector as V
+import Data.Version (showVersion)
 import qualified Network.Wreq as W
+import qualified Paths_isysuclosed as Paths
 import System.Directory
 import Lucid
 import Text.Regex (mkRegex, matchRegex)
+
 
 data PreexistingClosing = PreexistingClosing {
     _preexistingClosingDay :: Day
@@ -163,7 +166,8 @@ footer :: HtmlT Identity ()
 footer = do
   br_ []
   small_ [style_ "display: block; text-align: center"] $ do
-    "This website is not affiliated Youngstown State University in any way. It "
+    span_ [title_ (T.pack . showVersion $ Paths.version)] "This website "
+    "is not affiliated Youngstown State University in any way. It "
     "was "
     a_ [href_ "https://github.com/relrod/isysuclosed.com/"] "written"
     " to make a point."
