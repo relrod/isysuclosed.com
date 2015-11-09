@@ -1,4 +1,4 @@
-# [isysuclosed.com](http://isysuclosed.com/)
+# [isysuclosed.com](https://isysuclosed.com/)
 
 Haskell rewrite of isysuclosed.com.
 
