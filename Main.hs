@@ -140,7 +140,6 @@ weatherCheckBody wx closings wkbn alertCount alerts since =
     p_ [class_ "t"] $ do
       "There "
       if fromMaybe 0 alertCount == 1 then "is " else "are "
-      "currently "
       strong_ . toHtml $ maybe "unknown" show alertCount
       " weather "
       if fromMaybe 0 alertCount == 1 then "alert " else "alerts "
