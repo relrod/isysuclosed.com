@@ -64,31 +64,17 @@ main = scotty 3000 $ do
     json $ ClosingStatus (isMentioned (wkbn ^. W.responseBody)) closings (fromMaybe 0 alertCount)
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
-    wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
-    wundergroundKey <- liftIO $ readFile "/etc/isysuclosed/wunderground_api_key"
-    wx     <- liftIO $ getConditions wundergroundKey
-    alerts <- liftIO $ getAlerts wundergroundKey
-    since  <- liftIO lastAlertsTime
     current <- liftIO $ zonedTimeToUTC <$> getZonedTime
-    let closings = closingCount (wkbn ^. W.responseBody)
-        alertCount = alerts ^? key "alerts" . _Array . to V.length
-    html $ renderText $
-      doctypehtml_ $ do
-        head_ $ do
-          meta_ [charset_ "utf-8"]
-          meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1"]
-          link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
-          link_ [ href_ "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
-                , rel_ "stylesheet"
-                , type_ "text/css"
-                ]
-          style
-          title_ "YSU Closing Status"
-          analytics
-        body_ $ do
-          case isPreexistingClosure (utctDay current) of
-            Just closure -> ysuClosed closure
-            Nothing -> weatherCheckBody wx closings wkbn alertCount alerts since
+    case isPreexistingClosure (utctDay current) of
+      Just closure ->
+        headerHtml $
+          body_ $ do
+            ysuClosed closure
+            footer
+      Nothing -> do
+        v <- liftIO weatherCheckBody
+        headerHtml $ do
+          body_ v
           footer
 
 isPreexistingClosure :: Day -> Maybe PreexistingClosing
@@ -105,61 +91,83 @@ ysuClosed closing =
       "!"
     p_ [class_ "t"] "Enjoy your rare day off!"
 
-weatherCheckBody
-  :: (AsValue s, AsValue s1, ToHtml r,
-      Term [Attribute] (HtmlT Identity () -> t)) =>
-     s1 -> Int -> W.Response BL.ByteString -> Maybe Int -> s -> r -> t
-weatherCheckBody wx closings wkbn alertCount alerts since =
-  div_ [class_ "container"] $ do
-    h1_ "YSU Closing Status"
-    p_ [class_ "t"] "So, here's the deal:"
-    p_ [class_ "t"] $ do
-      "The weather is currently "
-      strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
-      " and "
-      strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
-      "."
-    p_ [class_ "t"] $ do
-      "With the windchill, it feels like "
-      strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
-      "."
-    p_ [class_ "t"] $ do
-      "There "
-      if closings == 1 then "is " else "are "
-      "currently "
-      strong_ . toHtml . show $ closings
-      if closings == 1 then " delay or closing " else " delays/closings "
-      "according to a local (Youngstown) news source."
-    p_ [class_ "t"] $ do
-      "Youngstown State University "
-      strong_ $
-        if isMentioned (wkbn ^. W.responseBody)
-        then span_ [style_ "color: green;"] "WAS mentioned"
-        else span_ [style_ "color: red;"] "was NOT mentioned"
-      " among them."
-    p_ [class_ "t"] $ do
-      "There "
-      if fromMaybe 0 alertCount == 1 then "is " else "are "
-      strong_ . toHtml $ maybe "unknown" show alertCount
-      " weather "
-      if fromMaybe 0 alertCount == 1 then "alert " else "alerts "
-      "covering Youngstown as of "
-      strong_  . toHtml $ since
-      "."
-    when (fromMaybe 0 alertCount /= 0) $
-      ul_ $
-        mapM_ (\w -> li_ $ do
-                 strong_ . toHtml $ w ^. key "description" . _String
-                 " expiring "
-                 w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
-    hr_ []
-    p_ [style_ "text-align: center;"] $
-      constructTweet
-        closings
-        alertCount
-        (wx ^? key "current_observation" . key "feelslike_string" . _String)
-        (wx ^? key "current_observation" . key "weather" . _String)
-        (isMentioned (wkbn ^. W.responseBody))
+weatherCheckBody :: IO (HtmlT Identity ())
+weatherCheckBody = do
+  wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
+  wundergroundKey <- liftIO $ readFile "/etc/isysuclosed/wunderground_api_key"
+  wx     <- liftIO $ getConditions wundergroundKey
+  alerts <- liftIO $ getAlerts wundergroundKey
+  since  <- liftIO lastAlertsTime
+  let closings = closingCount (wkbn ^. W.responseBody)
+      alertCount = alerts ^? key "alerts" . _Array . to V.length
+  return $
+    div_ [class_ "container"] $ do
+      h1_ "YSU Closing Status"
+      p_ [class_ "t"] "So, here's the deal:"
+      p_ [class_ "t"] $ do
+        "The weather is currently "
+        strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
+        " and "
+        strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
+        "."
+      p_ [class_ "t"] $ do
+        "With the windchill, it feels like "
+        strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
+        "."
+      p_ [class_ "t"] $ do
+        "There "
+        if closings == 1 then "is " else "are "
+        "currently "
+        strong_ . toHtml . show $ closings
+        if closings == 1 then " delay or closing " else " delays/closings "
+        "according to a local (Youngstown) news source."
+      p_ [class_ "t"] $ do
+        "Youngstown State University "
+        strong_ $
+          if isMentioned (wkbn ^. W.responseBody)
+          then span_ [style_ "color: green;"] "WAS mentioned"
+          else span_ [style_ "color: red;"] "was NOT mentioned"
+        " among them."
+      p_ [class_ "t"] $ do
+        "There "
+        if fromMaybe 0 alertCount == 1 then "is " else "are "
+        strong_ . toHtml $ maybe "unknown" show alertCount
+        " weather "
+        if fromMaybe 0 alertCount == 1 then "alert " else "alerts "
+        "covering Youngstown as of "
+        strong_  . toHtml $ since
+        "."
+      when (fromMaybe 0 alertCount /= 0) $
+        ul_ $
+          mapM_ (\w -> li_ $ do
+                   strong_ . toHtml $ w ^. key "description" . _String
+                   " expiring "
+                   w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+      hr_ []
+      p_ [style_ "text-align: center;"] $
+        constructTweet
+          closings
+          alertCount
+          (wx ^? key "current_observation" . key "feelslike_string" . _String)
+          (wx ^? key "current_observation" . key "weather" . _String)
+          (isMentioned (wkbn ^. W.responseBody))
+
+headerHtml :: HtmlT Identity a -> ActionM ()
+headerHtml content =
+  html $ renderText $
+    doctypehtml_ $ do
+      head_ $ do
+        meta_ [charset_ "utf-8"]
+        meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1"]
+        link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
+        link_ [ href_ "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
+              , rel_ "stylesheet"
+              , type_ "text/css"
+              ]
+        style
+        title_ "YSU Closing Status"
+        analytics
+      content
 
 footer :: HtmlT Identity ()
 footer = do
