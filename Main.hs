@@ -61,7 +61,12 @@ main = scotty 3000 $ do
     alerts <- liftIO $ getAlerts wundergroundKey
     let closings = closingCount (wkbn ^. W.responseBody)
         alertCount = alerts ^? key "alerts" . _Array . to V.length
-    json $ ClosingStatus (isMentioned (wkbn ^. W.responseBody)) closings (fromMaybe 0 alertCount)
+    current <- liftIO $ zonedTimeToUTC <$> getZonedTime
+    case isPreexistingClosure (utctDay current) of
+      Just _ ->
+        json $ ClosingStatus True closings (fromMaybe 0 alertCount)
+      Nothing ->
+        json $ ClosingStatus (isMentioned (wkbn ^. W.responseBody)) closings (fromMaybe 0 alertCount)
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
     current <- liftIO $ zonedTimeToUTC <$> getZonedTime
