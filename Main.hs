@@ -17,6 +17,7 @@ import qualified Data.Text as T
 import Data.Time.Calendar
 import Data.Time.Clock
 import Data.Time.Format.Human
+import Data.Time.LocalTime (getZonedTime, zonedTimeToUTC)
 import qualified Data.Vector as V
 import Data.Version (showVersion)
 import qualified Network.Wreq as W
@@ -24,7 +25,6 @@ import qualified Paths_isysuclosed as Paths
 import System.Directory
 import Lucid
 import Text.Regex (mkRegex, matchRegex)
-
 
 data PreexistingClosing = PreexistingClosing {
     _preexistingClosingDay :: Day
@@ -69,7 +69,7 @@ main = scotty 3000 $ do
     wx     <- liftIO $ getConditions wundergroundKey
     alerts <- liftIO $ getAlerts wundergroundKey
     since  <- liftIO lastAlertsTime
-    current <- liftIO getCurrentTime
+    current <- liftIO $ zonedTimeToUTC <$> getZonedTime
     let closings = closingCount (wkbn ^. W.responseBody)
         alertCount = alerts ^? key "alerts" . _Array . to V.length
     html $ renderText $
@@ -211,7 +211,7 @@ style = style_ . T.concat $
 -- We do this so we don't go over the wunderground API limit.
 getAlerts :: String -> IO BL.ByteString
 getAlerts key' = do
-  current <- getCurrentTime
+  current <- liftIO $ zonedTimeToUTC <$> getZonedTime
   a <- try (getModificationTime "/var/tmp/isysuclosed_alerts.json") :: IO (Either IOException UTCTime)
   case a of
     Left _  -> writeAlerts
@@ -245,7 +245,7 @@ lastAlertsTime = do
 -- We do this so we don't go over the wunderground API limit.
 getConditions :: String -> IO BL.ByteString
 getConditions key' = do
-  current <- getCurrentTime
+  current <- liftIO $ zonedTimeToUTC <$> getZonedTime
   a <- try (getModificationTime "/var/tmp/isysuclosed_wx.json") :: IO (Either IOException UTCTime)
   case a of
     Left _  -> writeConditions
