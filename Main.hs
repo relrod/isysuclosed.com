@@ -31,6 +31,9 @@ data PreexistingClosing = PreexistingClosing {
   , _preexistingClosingReason :: T.Text
   } deriving (Eq, Ord, Show)
 
+finalExamBeginDate :: Day
+finalExamBeginDate = fromGregorian 2015 12 07
+
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
   [ PreexistingClosing (fromGregorian 2015 11 11) "Veterans Day"
@@ -44,12 +47,14 @@ data ClosingStatus = ClosingStatus {
     _isClosed :: Bool
   , _numClosings :: Int
   , _numAlerts :: Int
+  , _daysUntilFinals :: Integer
   } deriving (Eq, Ord, Show)
 
 instance A.ToJSON ClosingStatus where
-  toJSON (ClosingStatus i nc na) = A.object [ "is_closed" A..= i
+  toJSON (ClosingStatus i nc na duf) = A.object [ "is_closed" A..= i
                                             , "closings" A..= nc
                                             , "alerts" A..= na
+                                            , "days_until_finals" A..= duf
                                             ]
 
 main :: IO ()
@@ -62,11 +67,12 @@ main = scotty 3000 $ do
     let closings = closingCount (wkbn ^. W.responseBody)
         alertCount = alerts ^? key "alerts" . _Array . to V.length
     current <- liftIO $ zonedTimeToUTC <$> getZonedTime
-    case isPreexistingClosure (utctDay current) of
+    let currentDay = utctDay current
+    case isPreexistingClosure currentDay of
       Just _ ->
-        json $ ClosingStatus True closings (fromMaybe 0 alertCount)
+        json $ ClosingStatus True closings (fromMaybe 0 alertCount) (daysUntilFinalsStart currentDay)
       Nothing ->
-        json $ ClosingStatus (isMentioned (wkbn ^. W.responseBody)) closings (fromMaybe 0 alertCount)
+        json $ ClosingStatus (isMentioned (wkbn ^. W.responseBody)) closings (fromMaybe 0 alertCount) (daysUntilFinalsStart currentDay)
   get "/" $ do
     setHeader "Cache-Control" "no-cache"
     current <- liftIO $ zonedTimeToUTC <$> getZonedTime
@@ -77,7 +83,7 @@ main = scotty 3000 $ do
             ysuClosed closure
             footer
       Nothing -> do
-        v <- liftIO weatherCheckBody
+        v <- liftIO (weatherCheckBody (utctDay current))
         headerHtml $ do
           body_ v
           footer
@@ -96,8 +102,23 @@ ysuClosed closing =
       "!"
     p_ [class_ "t"] "Enjoy your rare day off!"
 
-weatherCheckBody :: IO (HtmlT Identity ())
-weatherCheckBody = do
+daysUntilFinalsStart :: Day -> Integer
+daysUntilFinalsStart current = diffDays finalExamBeginDate current
+
+daysUntilFinalsStartText :: Day -> HtmlT Identity ()
+daysUntilFinalsStartText current = do
+  let finalDays = daysUntilFinalsStart current
+  if finalDays <= 0 && finalDays < 7
+    then "Good luck on finals!"
+    else if finalDays < 0
+         then "Hope you had a good semester!"
+         else do
+           "For the curious, final exams start in "
+           strong_ (toHtml . show $ finalDays)
+           " days."
+
+weatherCheckBody :: Day -> IO (HtmlT Identity ())
+weatherCheckBody day = do
   wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
   wundergroundKey <- liftIO $ readFile "/etc/isysuclosed/wunderground_api_key"
   wx     <- liftIO $ getConditions wundergroundKey
@@ -148,6 +169,7 @@ weatherCheckBody = do
                    strong_ . toHtml $ w ^. key "description" . _String
                    " expiring "
                    w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+      p_ [class_ "t"] $ daysUntilFinalsStartText day
       hr_ []
       p_ [style_ "text-align: center;"] $
         constructTweet
