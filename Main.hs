@@ -103,7 +103,7 @@ ysuClosed closing =
     p_ [class_ "t"] "Enjoy your rare day off!"
 
 daysUntilFinalsStart :: Day -> Integer
-daysUntilFinalsStart current = diffDays finalExamBeginDate current
+daysUntilFinalsStart = diffDays finalExamBeginDate
 
 daysUntilFinalsStartText :: Day -> HtmlT Identity ()
 daysUntilFinalsStartText current = do
@@ -132,8 +132,8 @@ weatherCheckBody day = do
       p_ [class_ "t"] "So, here's the deal..."
 
       div_ [class_ "row"] $ do
-        div_ [class_ "col-sm-4"] $ do
-          widget "" "Current Conditions" "for Youngstown, OH" Nothing $ Just $ do
+        div_ [class_ "col-sm-4"] $
+          widget "" "Current Conditions" "for Youngstown, OH" Nothing $ Just $
             ul_ [class_ "list-group list-group-flush"] $ do
               li_ [class_ "list-group-item"] $ do
                 "Conditions: "
@@ -145,12 +145,12 @@ weatherCheckBody day = do
                 "With windchill: "
                 strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
 
-        div_ [class_ "col-sm-4"] $ do
-          widget "" "Local Closings/Delays" "according to a Youngstown news source" Nothing $ Just $ do
+        div_ [class_ "col-sm-4"] $
+          widget "" "Local Closings/Delays" "according to a Youngstown news source" Nothing $ Just $
             ul_ [class_ "list-group list-group-flush"] $ do
               li_ [class_ "list-group-item"] $
                 h1_ $ strong_ . toHtml . show $ closings
-              when (closings > 0) $ do
+              when (closings > 0) $
                 li_ [class_ "list-group-item"] $ do
                   "YSU "
                   strong_ $
@@ -159,9 +159,9 @@ weatherCheckBody day = do
                     else span_ [style_ "color: red;"] "was NOT mentioned"
                   " among them."
 
-        div_ [class_ "col-sm-4"] $ do
-          widget "" "Local Weather Alerts" ("as of " <> T.pack since) Nothing $ Just $ do
-            ul_ [class_ "list-group list-group-flush"] $ do
+        div_ [class_ "col-sm-4"] $
+          widget "" "Local Weather Alerts" ("as of " <> T.pack since) Nothing $ Just $
+            ul_ [class_ "list-group list-group-flush"] $
               li_ [class_ "list-group-item"] $ do
                 h1_ $ strong_ . toHtml $ maybe "unknown" show alertCount
                 when (fromMaybe 0 alertCount /= 0) $
@@ -211,7 +211,7 @@ widget ::
   -> Maybe (HtmlT Identity ())
   -> Maybe (HtmlT Identity ())
   -> HtmlT Identity ()
-widget extraClass title subtitle cardblockContent cardContent = do
+widget extraClass title subtitle cardblockContent cardContent =
   div_ [class_ ("card " <> extraClass)] $ do
     -- <img class="card-img-top" data-src="holder.js/100%x180/?text=Image cap" alt="Card image cap">
     div_ [class_ "card-block"] $ do
