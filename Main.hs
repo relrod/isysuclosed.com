@@ -126,49 +126,51 @@ weatherCheckBody day = do
   since  <- liftIO lastAlertsTime
   let closings = closingCount (wkbn ^. W.responseBody)
       alertCount = alerts ^? key "alerts" . _Array . to V.length
-  return $
+  return $ do
+    navbar
     div_ [class_ "container"] $ do
-      h1_ "YSU Closing Status"
-      p_ [class_ "t"] "So, here's the deal:"
-      p_ [class_ "t"] $ do
-        "The weather is currently "
-        strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
-        " and "
-        strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
-        "."
-      p_ [class_ "t"] $ do
-        "With the windchill, it feels like "
-        strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
-        "."
-      p_ [class_ "t"] $ do
-        "There "
-        if closings == 1 then "is " else "are "
-        "currently "
-        strong_ . toHtml . show $ closings
-        if closings == 1 then " delay or closing " else " delays/closings "
-        "according to a local (Youngstown) news source."
-      p_ [class_ "t"] $ do
-        "Youngstown State University "
-        strong_ $
-          if isMentioned (wkbn ^. W.responseBody)
-          then span_ [style_ "color: green;"] "WAS mentioned"
-          else span_ [style_ "color: red;"] "was NOT mentioned"
-        " among them."
-      p_ [class_ "t"] $ do
-        "There "
-        if fromMaybe 0 alertCount == 1 then "is " else "are "
-        strong_ . toHtml $ maybe "unknown" show alertCount
-        " weather "
-        if fromMaybe 0 alertCount == 1 then "alert " else "alerts "
-        "covering Youngstown as of "
-        strong_  . toHtml $ since
-        "."
-      when (fromMaybe 0 alertCount /= 0) $
-        ul_ $
-          mapM_ (\w -> li_ $ do
-                   strong_ . toHtml $ w ^. key "description" . _String
-                   " expiring "
-                   w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+      p_ [class_ "t"] "So, here's the deal..."
+
+      div_ [class_ "row"] $ do
+        div_ [class_ "col-sm-4"] $ do
+          widget "" "Current Conditions" "for Youngstown, OH" Nothing $ Just $ do
+            ul_ [class_ "list-group list-group-flush"] $ do
+              li_ [class_ "list-group-item"] $ do
+                "Conditions: "
+                strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "weather" . _String)
+              li_ [class_ "list-group-item"] $ do
+                "Temperature: "
+                strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "temperature_string" . _String)
+              li_ [class_ "list-group-item"] $ do
+                "With windchill: "
+                strong_ . toHtml $ fromMaybe "(unknown)" (wx ^? key "current_observation" . key "feelslike_string" . _String)
+
+        div_ [class_ "col-sm-4"] $ do
+          widget "" "Local Closings/Delays" "according to a Youngstown news source" Nothing $ Just $ do
+            ul_ [class_ "list-group list-group-flush"] $ do
+              li_ [class_ "list-group-item"] $
+                h1_ $ strong_ . toHtml . show $ closings
+              when (closings > 0) $ do
+                li_ [class_ "list-group-item"] $ do
+                  "YSU "
+                  strong_ $
+                    if isMentioned (wkbn ^. W.responseBody)
+                    then span_ [style_ "color: green;"] "WAS mentioned"
+                    else span_ [style_ "color: red;"] "was NOT mentioned"
+                  " among them."
+
+        div_ [class_ "col-sm-4"] $ do
+          widget "" "Local Weather Alerts" ("as of " <> T.pack since) Nothing $ Just $ do
+            ul_ [class_ "list-group list-group-flush"] $ do
+              li_ [class_ "list-group-item"] $ do
+                h1_ $ strong_ . toHtml $ maybe "unknown" show alertCount
+                when (fromMaybe 0 alertCount /= 0) $
+                  ul_ $
+                    mapM_ (\w -> li_ [class_ "list-group-item"] $ do
+                               strong_ . toHtml $ w ^. key "description" . _String
+                               " expiring "
+                               w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+
       p_ [class_ "t"] $ daysUntilFinalsStartText day
       hr_ []
       p_ [style_ "text-align: center;"] $
@@ -187,7 +189,7 @@ headerHtml content =
         meta_ [charset_ "utf-8"]
         meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1"]
         link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
-        link_ [ href_ "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/css/bootstrap.min.css"
+        link_ [ href_ "//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css"
               , rel_ "stylesheet"
               , type_ "text/css"
               ]
@@ -196,9 +198,30 @@ headerHtml content =
         analytics
       content
 
+navbar :: HtmlT Identity ()
+navbar =
+  nav_ [class_ "navbar navbar-dark bg-inverse navbar-static-top iyc-navbar"] $
+    div_ [class_ "container"] $
+      a_ [class_ "navbar-brand", href_ "/"] "YSU Closing Status"
+
+widget ::
+  T.Text
+  -> T.Text
+  -> T.Text
+  -> Maybe (HtmlT Identity ())
+  -> Maybe (HtmlT Identity ())
+  -> HtmlT Identity ()
+widget extraClass title subtitle cardblockContent cardContent = do
+  div_ [class_ ("card " <> extraClass)] $ do
+    -- <img class="card-img-top" data-src="holder.js/100%x180/?text=Image cap" alt="Card image cap">
+    div_ [class_ "card-block"] $ do
+      h4_ [class_ "card-title"] (toHtml title)
+      h6_ [class_ "card-subtitle text-muted"] (toHtml subtitle)
+      sequence_ cardblockContent
+    sequence_ cardContent
+
 footer :: HtmlT Identity ()
 footer = do
-  br_ []
   small_ [style_ "display: block; text-align: center"] $ do
     span_ [title_ (T.pack . showVersion $ Paths.version)] "This website "
     "is not affiliated Youngstown State University in any way. It "
@@ -213,10 +236,10 @@ footer = do
       " resources."
   p_ [style_ "text-align: center; color: #888888"] $
     small_ "Valid HTML5. Weather information via Weather Underground."
-  img_ [ style_ "display: block; margin: 0 auto; width: 180px;"
-       , src_ "http://icons.wxug.com/logos/images/wundergroundLogo_4c_horz.jpg"
-       , alt_ "Weather Underground Logo"
-       ]
+  --img_ [ style_ "display: block; margin: 0 auto; width: 180px;"
+  --     , src_ "http://icons.wxug.com/logos/JPG/wundergroundLogo_4c.jpg"
+  --     , alt_ "Weather Underground Logo"
+  --     ]
   twitter
 
 
@@ -235,6 +258,7 @@ style = style_ . T.concat $
         [ "* { font-family: \"Proxima Nova\", \"Open Sans\", sans-serif !important; }"
         , "h1 { font-weight: bold; text-align: center; }"
         , "p.t { font-size: 1.8em; text-align: center; }"
+        , ".iyc-navbar { margin-bottom: 10px; }"
         ]
 
 -- | First, try reading from the cache to get the last modified time.
