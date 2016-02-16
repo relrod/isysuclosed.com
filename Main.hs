@@ -319,7 +319,9 @@ getConditions key' = do
       return wx
 
 isMentioned :: BL.ByteString -> Bool
-isMentioned y = B.pack "Youngstown State University</b>:" `B.isInfixOf` BL.toStrict y
+isMentioned y =
+  B.pack "Youngstown State University</b>:" `B.isInfixOf` BL.toStrict y
+  || B.pack "YSU</b>:" `B.isInfixOf` BL.toStrict y
 
 closingCount :: BL.ByteString -> Int
 closingCount x =
