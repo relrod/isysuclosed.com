@@ -320,8 +320,10 @@ getConditions key' = do
 
 isMentioned :: BL.ByteString -> Bool
 isMentioned y =
-  B.pack "Youngstown State University</b>:" `B.isInfixOf` BL.toStrict y
-  || B.pack "YSU</b>:" `B.isInfixOf` BL.toStrict y
+  any (\name -> B.pack (name ++ "</b>:") `B.isInfixOf` BL.toStrict y)
+  [ "Youngstown State University"
+  , "YSU"
+  ]
 
 closingCount :: BL.ByteString -> Int
 closingCount x =
