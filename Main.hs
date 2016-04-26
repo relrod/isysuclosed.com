@@ -104,11 +104,11 @@ daysUntilFinalsStart = diffDays finalExamBeginDate
 daysUntilFinalsStartText :: Day -> HtmlT Identity ()
 daysUntilFinalsStartText current = do
   let finalDays = daysUntilFinalsStart current
-  if finalDays >= 0 && finalDays < 7
-    then "Good luck on finals!"
+  if finalDays <= 0 && finalDays > -7
+    then "Good luck on finals!" -- During finals week
     else if finalDays < 0
-         then "Hope you had a good semester!"
-         else do
+         then "Hope you had a good semester!" -- After finals week
+         else do -- Normal, during the semester
            "For the curious, final exams start in "
            strong_ (toHtml . show $ finalDays)
            " days."
