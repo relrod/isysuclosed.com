@@ -32,12 +32,13 @@ data PreexistingClosing = PreexistingClosing {
   } deriving (Eq, Ord, Show)
 
 finalExamBeginDate :: Day
-finalExamBeginDate = fromGregorian 2016 05 02
+finalExamBeginDate = fromGregorian 2016 12 12
 
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
-  [ PreexistingClosing (fromGregorian 2016 01 18) "Martin Luther King Day"
-  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2016 03 x) "Spring Break") [7..13]
+  [ PreexistingClosing (fromGregorian 2016 09 05) "Labor Day"
+  , PreexistingClosing (fromGregorian 2016 11 11) "Veterans Day"
+  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2016 11 x) "Thanksgiving Break") [23..25]
 
 data ClosingStatus = ClosingStatus {
     _isClosed :: Bool
