@@ -77,7 +77,7 @@ main = scotty 3000 $ do
       Just closure ->
         headerHtml $
           body_ $ do
-            ysuClosed closure
+            ysuClosed closure (utctDay current)
             footer
       Nothing -> do
         v <- liftIO (weatherCheckBody (utctDay current))
@@ -89,8 +89,8 @@ isPreexistingClosure :: Day -> Maybe PreexistingClosing
 isPreexistingClosure day =
   find (\x -> _preexistingClosingDay x == day) preexistingClosures
 
-ysuClosed :: PreexistingClosing -> HtmlT Identity ()
-ysuClosed closing =
+ysuClosed :: PreexistingClosing -> Day -> HtmlT Identity ()
+ysuClosed closing day =
   div_ [class_ "container"] $ do
     h1_ "YSU Closing Status"
     p_ [class_ "t"] $ do
@@ -98,6 +98,7 @@ ysuClosed closing =
       strong_ (toHtml $ _preexistingClosingReason closing)
       "!"
     p_ [class_ "t"] "Enjoy your rare day off!"
+    p_ [class_ "t"] $ daysUntilFinalsStartText day
 
 daysUntilFinalsStart :: Day -> Integer
 daysUntilFinalsStart = diffDays finalExamBeginDate
