@@ -190,7 +190,7 @@ headerHtml content =
         meta_ [charset_ "utf-8"]
         meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1"]
         link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
-        link_ [ href_ "//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css"
+        link_ [ href_ "//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
               , rel_ "stylesheet"
               , type_ "text/css"
               ]
