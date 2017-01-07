@@ -203,7 +203,7 @@ navbar :: HtmlT Identity ()
 navbar =
   nav_ [class_ "navbar navbar-dark bg-inverse navbar-static-top iyc-navbar"] $
     div_ [class_ "container"] $
-      a_ [class_ "navbar-brand", href_ "/"] "YSU Closing Status"
+      a_ [class_ "navbar-brand", href_ "/", style_ "color: white;"] "YSU Closing Status"
 
 widget ::
   T.Text
