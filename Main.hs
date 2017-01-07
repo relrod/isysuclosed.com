@@ -31,14 +31,17 @@ data PreexistingClosing = PreexistingClosing {
   , _preexistingClosingReason :: T.Text
   } deriving (Eq, Ord, Show)
 
+-- Edit here each semester
+
 finalExamBeginDate :: Day
-finalExamBeginDate = fromGregorian 2016 12 12
+finalExamBeginDate = fromGregorian 2017 05 01
 
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
-  [ PreexistingClosing (fromGregorian 2016 09 05) "Labor Day"
-  , PreexistingClosing (fromGregorian 2016 11 11) "Veterans Day"
-  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2016 11 x) "Thanksgiving Break") [23..25]
+  [ PreexistingClosing (fromGregorian 2017 01 16) "Martin Luther King Day"
+  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2017 03 x) "Spring Break") [6..12]
+
+-- And stop editing here.
 
 data ClosingStatus = ClosingStatus {
     _isClosed :: Bool

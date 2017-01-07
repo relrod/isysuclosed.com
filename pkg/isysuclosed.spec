@@ -1,8 +1,8 @@
-%global gitdate 20160824
+%global gitdate 20170107
 %global buildhost %(hostname)
 
 Name:           isysuclosed
-Version:        0.4.3
+Version:        0.4.4
 Release:        1.%{gitdate}git%{?dist}
 Summary:        The "isysuclosed.com" webapp.
 License:        BSD
@@ -15,7 +15,7 @@ BuildRequires: cabal-install >= 1.18
 %endif
 
 %description
-Haskell (Snap Framework) app for isysuclosed.com
+Haskell (Scotty) app for isysuclosed.com
 
 %prep
 if [ -d isysuclosed.com ]; then
@@ -56,6 +56,9 @@ cp pkg/%{name}.service %{buildroot}/%{_unitdir}/%{name}.service
 %{_bindir}/%{name}
 
 %changelog
+* Sat Jan 07 2017 Ricky Elrod <rbelrod@student.ysu.edu> - 0.4.4-1.20170107git
+- Deploy
+
 * Wed Aug 24 2016 Ricky Elrod <rbelrod@student.ysu.edu> - 0.4.3-1.20160824git
 - Deploy
 
