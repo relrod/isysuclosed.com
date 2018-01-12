@@ -29,6 +29,7 @@ fi
 %build
 export LANG=en_US.UTF-8
 cd isysuclosed.com
+sed -i 's/-O0/-O2/' isysuclosed.cabal
 cabal sandbox init
 cabal install -j --only-dependencies
 cabal install -j
