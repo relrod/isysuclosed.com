@@ -118,6 +118,13 @@ daysUntilFinalsStartText current = do
            strong_ (toHtml . show $ finalDays)
            " days."
 
+closedAlert :: HtmlT Identity ()
+closedAlert =
+  div_ [class_ "alert alert-danger", role_ "alert"] $ do
+    "My sources tell me that YSU "
+    strong_ "might"
+    " be closed!"
+
 weatherCheckBody :: Day -> IO (HtmlT Identity ())
 weatherCheckBody day = do
   wkbn   <- liftIO $ W.get "http://wx.wkbn.com/weather/WKBN_closings_delays.html"
@@ -130,6 +137,7 @@ weatherCheckBody day = do
   return $ do
     navbar
     div_ [class_ "container"] $ do
+      when (isMentioned (wkbn ^. W.responseBody)) closedAlert
       p_ [class_ "t"] "So, here's the deal..."
 
       div_ [class_ "row"] $ do
