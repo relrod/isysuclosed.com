@@ -34,7 +34,7 @@ data PreexistingClosing = PreexistingClosing {
 -- Edit here each semester
 
 finalExamBeginDate :: Day
-finalExamBeginDate = fromGregorian 2017 04 30
+finalExamBeginDate = fromGregorian 2018 04 30
 
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
@@ -52,10 +52,10 @@ data ClosingStatus = ClosingStatus {
 
 instance A.ToJSON ClosingStatus where
   toJSON (ClosingStatus i nc na duf) = A.object [ "is_closed" A..= i
-                                            , "closings" A..= nc
-                                            , "alerts" A..= na
-                                            , "days_until_finals" A..= duf
-                                            ]
+                                                , "closings" A..= nc
+                                                , "alerts" A..= na
+                                                , "days_until_finals" A..= duf
+                                                ]
 
 main :: IO ()
 main = scotty 3000 $ do
@@ -174,11 +174,10 @@ weatherCheckBody day = do
               li_ [class_ "list-group-item"] $ do
                 h1_ $ strong_ . toHtml $ maybe "unknown" show alertCount
                 when (fromMaybe 0 alertCount /= 0) $
-                  ul_ $
-                    mapM_ (\w -> li_ [class_ "list-group-item"] $ do
-                               strong_ . toHtml $ w ^. key "description" . _String
-                               " expiring "
-                               w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+                  mapM_ (\w -> li_ [class_ "list-group-item"] $ do
+                            strong_ . toHtml $ w ^. key "description" . _String
+                            " expiring "
+                            w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
 
       p_ [class_ "t"] $ daysUntilFinalsStartText day
       hr_ []
@@ -213,8 +212,8 @@ navbar =
     div_ [class_ "container"] $
       a_ [class_ "navbar-brand", href_ "/", style_ "color: white;"] "YSU Closing Status"
 
-widget ::
-  T.Text
+widget
+  :: T.Text
   -> T.Text
   -> T.Text
   -> Maybe (HtmlT Identity ())
@@ -223,7 +222,7 @@ widget ::
 widget extraClass title subtitle cardblockContent cardContent =
   div_ [class_ ("card " <> extraClass)] $ do
     -- <img class="card-img-top" data-src="holder.js/100%x180/?text=Image cap" alt="Card image cap">
-    div_ [class_ "card-block"] $ do
+    div_ [class_ "card-body"] $ do
       h4_ [class_ "card-title"] (toHtml title)
       h6_ [class_ "card-subtitle text-muted"] (toHtml subtitle)
       sequence_ cardblockContent
