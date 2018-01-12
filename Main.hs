@@ -34,7 +34,7 @@ data PreexistingClosing = PreexistingClosing {
 -- Edit here each semester
 
 finalExamBeginDate :: Day
-finalExamBeginDate = fromGregorian 2017 05 01
+finalExamBeginDate = fromGregorian 2017 12 11
 
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
@@ -190,7 +190,7 @@ headerHtml content =
         meta_ [charset_ "utf-8"]
         meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1"]
         link_ [href_ "//fonts.googleapis.com/css?family=Open+Sans", rel_ "stylesheet", type_ "text/css"]
-        link_ [ href_ "//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+        link_ [ href_ "//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
               , rel_ "stylesheet"
               , type_ "text/css"
               ]
@@ -201,7 +201,7 @@ headerHtml content =
 
 navbar :: HtmlT Identity ()
 navbar =
-  nav_ [class_ "navbar navbar-dark bg-inverse navbar-static-top iyc-navbar"] $
+  nav_ [class_ "navbar navbar-dark bg-dark navbar-static-top iyc-navbar"] $
     div_ [class_ "container"] $
       a_ [class_ "navbar-brand", href_ "/", style_ "color: white;"] "YSU Closing Status"
 
