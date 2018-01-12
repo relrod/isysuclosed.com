@@ -170,14 +170,14 @@ weatherCheckBody day = do
 
         div_ [class_ "col-sm-4"] $
           widget "" "Local Weather Alerts" ("as of " <> T.pack since) Nothing $ Just $
-            ul_ [class_ "list-group list-group-flush"] $
-              li_ [class_ "list-group-item"] $ do
-                h1_ $ strong_ . toHtml $ maybe "unknown" show alertCount
-                when (fromMaybe 0 alertCount /= 0) $
-                  mapM_ (\w -> li_ [class_ "list-group-item"] $ do
-                            strong_ . toHtml $ w ^. key "description" . _String
-                            " expiring "
-                            w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
+            ul_ [class_ "list-group list-group-flush"] $ do
+              li_ [class_ "list-group-item"] $
+                h1_ . strong_ . toHtml $ maybe "unknown" show alertCount
+              when (fromMaybe 0 alertCount /= 0) $
+                mapM_ (\w -> li_ [class_ "list-group-item"] $ do
+                          strong_ . toHtml $ w ^. key "description" . _String
+                          " expiring "
+                          w ^. key "expires" . _String . to toHtml) (alerts ^.. key "alerts" . values)
 
       p_ [class_ "t"] $ daysUntilFinalsStartText day
       hr_ []
