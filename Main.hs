@@ -34,12 +34,12 @@ data PreexistingClosing = PreexistingClosing {
 -- Edit here each semester
 
 finalExamBeginDate :: Day
-finalExamBeginDate = fromGregorian 2017 12 11
+finalExamBeginDate = fromGregorian 2017 04 30
 
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
-  [ PreexistingClosing (fromGregorian 2017 01 16) "Martin Luther King Day"
-  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2017 03 x) "Spring Break") [6..12]
+  [ PreexistingClosing (fromGregorian 2018 01 15) "Martin Luther King Day"
+  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2017 03 x) "Spring Break") [5..12]
 
 -- And stop editing here.
 
