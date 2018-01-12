@@ -85,8 +85,7 @@ main = scotty 3000 $ do
       Nothing -> do
         v <- liftIO (weatherCheckBody (utctDay current))
         headerHtml $ do
-          body_ v
-          footer
+          body_ (v >> footer)
 
 isPreexistingClosure :: Day -> Maybe PreexistingClosing
 isPreexistingClosure day =
