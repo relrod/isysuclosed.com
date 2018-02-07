@@ -39,7 +39,7 @@ finalExamBeginDate = fromGregorian 2018 04 30
 preexistingClosures :: [PreexistingClosing]
 preexistingClosures =
   [ PreexistingClosing (fromGregorian 2018 01 15) "Martin Luther King Day"
-  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2017 03 x) "Spring Break") [5..12]
+  ] ++ fmap (\x -> PreexistingClosing (fromGregorian 2018 03 x) "Spring Break") [5..12]
 
 -- And stop editing here.
 
